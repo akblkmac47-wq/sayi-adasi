@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="description" content="Sayı Adası Macerası - 2. Sınıf Matematik Oyunu (Toplama ve Çıkarma) - Sürüm 2.0">
+<title>🎮 Sayı Adası Macerası v2</title>
+<style>
+:root{
+  --sari:#fdd835; --turuncu:#fb8c00; --koyu:#0b3d5c;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:"Trebuchet MS","Segoe UI",Verdana,sans-serif;
+  background:linear-gradient(180deg,#4fc3f7 0%,#29b6f6 40%,#0288d1 100%);
+  color:var(--koyu); overflow:hidden; user-select:none; touch-action:manipulation;
+}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+.screen{display:none;flex:1;overflow-y:auto;padding:14px;animation:fadeIn .3s ease}
+.screen.active{display:flex;flex-direction:column}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.btn{border:none;border-radius:22px;padding:18px 26px;font-size:clamp(17px,2.3vw,25px);
+  font-weight:800;color:#fff;background:linear-gradient(180deg,#66bb6a,#2e7d32);
+  box-shadow:0 6px 0 #1b5e20,0 10px 18px rgba(0,0,0,.25);cursor:pointer;transition:.12s;font-family:inherit}
+.btn:active{transform:translateY(5px);box-shadow:0 1px 0 #1b5e20}
+.btn.mavi{background:linear-gradient(180deg,#42a5f5,#1565c0);box-shadow:0 6px 0 #0d47a1,0 10px 18px rgba(0,0,0,.25)}
+.btn.mavi:active{box-shadow:0 1px 0 #0d47a1}
+.btn.turuncu{background:linear-gradient(180deg,#ffa726,#ef6c00);box-shadow:0 6px 0 #e65100,0 10px 18px rgba(0,0,0,.25)}
+.btn.turuncu:active{box-shadow:0 1px 0 #e65100}
+.btn.mor{background:linear-gradient(180deg,#ab47bc,#6a1b9a);box-shadow:0 6px 0 #4a148c,0 10px 18px rgba(0,0,0,.25)}
+.btn.mor:active{box-shadow:0 1px 0 #4a148c}
+.btn.gri{background:linear-gradient(180deg,#90a4ae,#546e7a);box-shadow:0 6px 0 #37474f,0 10px 18px rgba(0,0,0,.25)}
+.btn.gri:active{box-shadow:0 1px 0 #37474f}
+.btn.kucuk{padding:11px 16px;font-size:clamp(13px,1.5vw,17px);border-radius:15px}
+.kart{background:rgba(255,255,255,.95);border-radius:26px;padding:20px;box-shadow:0 12px 30px rgba(0,0,0,.22)}
+.orta{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;flex:1}
+
+.logo{font-size:clamp(32px,6.5vw,70px);font-weight:900;color:#fff;text-shadow:0 4px 0 #0277bd,0 8px 22px rgba(0,0,0,.4)}
+.altbaslik{font-size:clamp(14px,2.1vw,23px);color:#fff;font-weight:700;text-shadow:0 2px 6px rgba(0,0,0,.35)}
+.ada-gorsel{font-size:clamp(48px,11vw,110px);animation:sallan 3s ease-in-out infinite}
+@keyframes sallan{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-14px) rotate(2deg)}}
+.menu-btns{display:flex;flex-wrap:wrap;gap:13px;justify-content:center;max-width:840px}
+.surum{position:fixed;right:10px;bottom:8px;color:#fff;opacity:.7;font-size:12px;font-weight:700}
+
+.harita{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;width:100%;max-width:1150px;margin:0 auto}
+.bolum-kart{background:rgba(255,255,255,.95);border-radius:22px;padding:16px;text-align:center;
+  cursor:pointer;transition:.15s;border:5px solid transparent;box-shadow:0 8px 20px rgba(0,0,0,.22)}
+.bolum-kart:active{transform:scale(.97)}
+.bolum-kart.kilitli{opacity:.55;cursor:not-allowed;filter:grayscale(.7)}
+.bolum-kart.tamam{border-color:var(--sari)}
+.bolum-kart .ikon{font-size:clamp(36px,6vw,58px)}
+.bolum-kart h3{font-size:clamp(16px,2.2vw,22px);margin:6px 0}
+.bolum-kart p{font-size:clamp(12px,1.6vw,15px);color:#37474f}
+.yildizlar{font-size:22px;margin-top:5px;letter-spacing:2px}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap;
+  background:rgba(255,255,255,.92);border-radius:18px;padding:9px 14px;box-shadow:0 6px 16px rgba(0,0,0,.2)}
+.rozet-kutu{display:flex;align-items:center;gap:5px;font-weight:800;font-size:clamp(13px,1.8vw,19px)}
+.ilerleme{height:13px;background:#cfd8dc;border-radius:10px;overflow:hidden;margin-top:9px}
+.ilerleme > div{height:100%;background:linear-gradient(90deg,#ffee58,#fb8c00);width:0;transition:width .3s}
+
+.soru-alan{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;padding:8px 0}
+.soru-metin{font-size:clamp(24px,4.6vw,52px);font-weight:900;color:#0b3d5c;background:rgba(255,255,255,.96);
+  padding:18px 26px;border-radius:24px;box-shadow:0 10px 24px rgba(0,0,0,.2);text-align:center;max-width:1000px;line-height:1.35}
+.soru-tip{font-size:clamp(12px,1.7vw,17px);font-weight:800;color:#fff;background:rgba(0,0,0,.3);padding:5px 15px;border-radius:13px}
+.secenekler{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:13px;width:100%;max-width:900px}
+.secenek{border:none;border-radius:20px;padding:20px 12px;font-size:clamp(22px,3.8vw,40px);font-weight:900;color:#fff;
+  background:linear-gradient(180deg,#42a5f5,#1565c0);box-shadow:0 6px 0 #0d47a1;cursor:pointer;font-family:inherit;transition:.12s}
+.secenek:active{transform:translateY(5px);box-shadow:0 1px 0 #0d47a1}
+.secenek.dogru{background:linear-gradient(180deg,#66bb6a,#2e7d32)!important;box-shadow:0 6px 0 #1b5e20!important;animation:zipla .5s}
+.secenek.yanlis{background:linear-gradient(180deg,#ef5350,#c62828)!important;box-shadow:0 6px 0 #b71c1c!important;animation:titre .4s}
+@keyframes titre{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+@keyframes zipla{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.ipucu{background:#fff8e1;border:3px dashed var(--turuncu);border-radius:18px;padding:12px 18px;
+  font-size:clamp(14px,2.1vw,21px);font-weight:700;color:#e65100;max-width:900px;text-align:center}
+
+.cevap-kutu{font-size:clamp(28px,4.8vw,50px);font-weight:900;background:#fff;border:5px solid var(--turuncu);
+  border-radius:18px;min-width:170px;padding:8px 18px;text-align:center;letter-spacing:4px;min-height:64px}
+.tus-takimi{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;max-width:600px;width:100%}
+.tus{border:none;border-radius:16px;padding:15px 0;font-size:clamp(20px,3.3vw,32px);font-weight:900;color:#fff;
+  background:linear-gradient(180deg,#78909c,#37474f);box-shadow:0 5px 0 #263238;cursor:pointer;font-family:inherit}
+.tus:active{transform:translateY(4px);box-shadow:0 1px 0 #263238}
+.tus.ok{background:linear-gradient(180deg,#66bb6a,#2e7d32);box-shadow:0 5px 0 #1b5e20}
+.tus.sil{background:linear-gradient(180deg,#ef5350,#c62828);box-shadow:0 5px 0 #b71c1c}
+
+.eslestir{display:grid;grid-template-columns:1fr 1fr;gap:13px;max-width:760px;width:100%}
+.es-kart{border:none;border-radius:16px;padding:16px 8px;font-size:clamp(18px,2.8vw,30px);font-weight:900;color:#fff;
+  background:linear-gradient(180deg,#ab47bc,#6a1b9a);box-shadow:0 5px 0 #4a148c;cursor:pointer;font-family:inherit;transition:.12s}
+.es-kart.sag{background:linear-gradient(180deg,#ffa726,#ef6c00);box-shadow:0 5px 0 #e65100}
+.es-kart.secili{outline:6px solid #fff;transform:scale(1.04)}
+.es-kart.bitti{visibility:hidden}
+
+#efekt{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+.konfeti{position:absolute;width:13px;height:19px;border-radius:3px;animation:dus 2.2s linear forwards}
+@keyframes dus{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+.mesaj-balon{position:fixed;top:15%;left:50%;transform:translateX(-50%);z-index:70;
+  background:rgba(255,255,255,.97);border-radius:26px;padding:18px 30px;font-size:clamp(20px,3.4vw,38px);
+  font-weight:900;box-shadow:0 14px 34px rgba(0,0,0,.3);animation:pop .4s;text-align:center}
+@keyframes pop{from{transform:translateX(-50%) scale(.4);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}
+
+/* ---- Mini oyun alanı ---- */
+.mini-alan{position:relative;flex:1;min-height:340px;background:rgba(255,255,255,.22);border-radius:22px;overflow:hidden;touch-action:none}
+.mini-orta{display:flex;gap:14px;justify-content:center;align-items:center;height:100%;flex-wrap:wrap;padding:14px;overflow-y:auto}
+.balon{position:absolute;width:92px;height:112px;border-radius:50% 50% 46% 46%;
+  display:flex;align-items:center;justify-content:center;font-size:29px;font-weight:900;color:#fff;
+  cursor:pointer;box-shadow:inset -10px -10px 20px rgba(0,0,0,.18);transition:transform .12s;will-change:transform}
+.balon::after{content:"";position:absolute;bottom:-12px;left:50%;width:2px;height:14px;background:rgba(255,255,255,.7)}
+.balon.patla{animation:patlama .32s forwards}
+@keyframes patlama{0%{transform:scale(1);opacity:1}45%{transform:scale(1.5);opacity:.9}100%{transform:scale(.2);opacity:0}}
+.balon.sonme{animation:sonme .3s forwards}
+@keyframes sonme{to{transform:scale(.5) rotate(25deg);opacity:0}}
+
+.sandik{font-size:clamp(46px,8vw,80px);cursor:pointer;transition:.15s;text-align:center}
+.sandik:active{transform:scale(.92)}
+.sandik-metin{font-size:clamp(20px,3.2vw,34px);font-weight:900;background:#fff;border-radius:16px;padding:9px 16px;margin-top:6px}
+
+.hafiza-grid{display:grid;grid-template-columns:repeat(4,minmax(70px,120px));gap:10px;justify-content:center;align-content:center;height:100%;padding:12px}
+.hkart{aspect-ratio:1/1;border:none;border-radius:16px;font-size:clamp(16px,2.6vw,26px);font-weight:900;color:#fff;
+  background:linear-gradient(180deg,#5c6bc0,#283593);box-shadow:0 5px 0 #1a237e;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;transition:.15s}
+.hkart.acik{background:linear-gradient(180deg,#ffb74d,#ef6c00);box-shadow:0 5px 0 #e65100}
+.hkart.bulundu{background:linear-gradient(180deg,#81c784,#2e7d32);box-shadow:0 5px 0 #1b5e20;cursor:default}
+
+.sepet{position:absolute;bottom:6px;font-size:56px;line-height:1;cursor:grab;user-select:none;will-change:transform}
+.dusen{position:absolute;width:66px;height:66px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:900;color:#fff;box-shadow:0 4px 10px rgba(0,0,0,.25);will-change:transform}
+
+.blok-alan{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;padding:14px;max-width:760px}
+.onluk{width:26px;height:78px;background:linear-gradient(180deg,#42a5f5,#1565c0);border-radius:6px;box-shadow:0 3px 0 #0d47a1}
+.birlik{width:26px;height:26px;background:linear-gradient(180deg,#ffd54f,#f9a825);border-radius:6px;box-shadow:0 3px 0 #ef6c00}
+
+.sirala-kutu{border:none;border-radius:18px;padding:20px 26px;font-size:clamp(24px,4vw,40px);font-weight:900;color:#fff;
+  background:linear-gradient(180deg,#26c6da,#00838f);box-shadow:0 5px 0 #006064;cursor:pointer;font-family:inherit;transition:.12s}
+.sirala-kutu.secildi{background:linear-gradient(180deg,#81c784,#2e7d32);box-shadow:0 5px 0 #1b5e20;opacity:.65}
+
+.ayar-satir{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:2px dashed #cfd8dc;flex-wrap:wrap}
+.ayar-satir label{font-weight:800;font-size:clamp(14px,1.9vw,19px)}
+select,input[type=text]{font-family:inherit;font-size:17px;padding:9px 13px;border-radius:13px;border:3px solid #90a4ae;font-weight:700}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+th,td{border:2px solid #b0bec5;padding:7px 9px;text-align:left}
+th{background:#e3f2fd;font-weight:900}
+.rapor-bos{padding:18px;text-align:center;color:#546e7a;font-weight:700}
+
+.rozet-liste{display:flex;flex-wrap:wrap;gap:11px;justify-content:center}
+.rozet{background:#fff;border-radius:18px;padding:11px 16px;font-weight:800;font-size:clamp(13px,1.9vw,18px);
+  box-shadow:0 6px 14px rgba(0,0,0,.18);opacity:.35;filter:grayscale(1);max-width:260px}
+.rozet.acik{opacity:1;filter:none;border:3px solid var(--sari)}
+.kucuk-not{font-size:12px;color:#eceff1;text-align:center;padding:5px}
+
+@media print{
+  body{background:#fff;overflow:visible}
+  .screen{display:none!important}
+  #yazdirAlan{display:block!important;color:#000}
+  .noprint{display:none!important}
+}
+#yazdirAlan{display:none}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ============ MENÜ ============ -->
+<section id="menu" class="screen active">
+  <div class="orta">
+    <div class="ada-gorsel">🏝️</div>
+    <h1 class="logo">Sayı Adası Macerası</h1>
+    <p class="altbaslik">2. Sınıf Matematik • 6 Bölüm • 9 Mini Oyun</p>
+    <div class="menu-btns">
+      <button class="btn" onclick="haritaAc()">▶️ Maceraya Başla</button>
+      <button class="btn turuncu" onclick="ekran('miniMenu')">🎯 Mini Oyunlar (9)</button>
+      <button class="btn mor" onclick="rozetleriGoster()">🏅 Rozetlerim</button>
+      <button class="btn mavi" onclick="ogretmenAc()">👩‍🏫 Öğretmen Paneli</button>
+      <button class="btn gri" onclick="tamEkran()">⛶ Tam Ekran</button>
+    </div>
+    <p class="kucuk-not">Akıllı tahta, tablet ve bilgisayarda çalışır. İnternet olmadan da açılır.</p>
+  </div>
+  <div class="surum">v2.0</div>
+</section>
+
+<!-- ============ HARİTA ============ -->
+<section id="harita" class="screen">
+  <div class="topbar">
+    <button class="btn kucuk gri" onclick="ekran('menu')">⬅️ Menü</button>
+    <div class="rozet-kutu">💎 Kristal: <span id="kristalSayi">0</span>/6</div>
+    <div class="rozet-kutu">⭐ Toplam Puan: <span id="toplamPuan">0</span></div>
+  </div>
+  <div class="orta">
+    <h2 style="color:#fff;text-shadow:0 3px 0 #0277bd;font-size:clamp(20px,3.4vw,34px)">Ada Haritası</h2>
+    <div class="harita" id="haritaKartlar"></div>
+  </div>
+</section>
+
+<!-- ============ OYUN ============ -->
+<section id="oyun" class="screen">
+  <div class="topbar">
+    <button class="btn kucuk gri" onclick="cikisOnay()">⬅️ Çık</button>
+    <div class="rozet-kutu">⭐ <span id="puan">0</span></div>
+    <div class="rozet-kutu">🔥 <span id="seri">0</span></div>
+    <div class="rozet-kutu">📋 <span id="soruNo">1</span>/<span id="soruTop">20</span></div>
+    <div class="rozet-kutu" id="sureKutu" style="display:none">⏱️ <span id="sure">0</span></div>
+    <button class="btn kucuk turuncu" onclick="soruyuOku()">🔊 Oku</button>
+  </div>
+  <div class="ilerleme"><div id="ilerlemeCubuk"></div></div>
+  <div class="soru-alan">
+    <div class="soru-tip" id="soruTip">Çoktan Seçmeli</div>
+    <div class="soru-metin" id="soruMetin">Soru</div>
+    <div id="cevapAlan" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:13px"></div>
+    <div class="ipucu" id="ipucu" style="display:none"></div>
+  </div>
+</section>
+
+<!-- ============ SONUÇ ============ -->
+<section id="sonuc" class="screen">
+  <div class="orta">
+    <div id="sonucIkon" style="font-size:clamp(56px,12vw,120px)">🏆</div>
+    <h2 id="sonucBaslik" style="color:#fff;font-size:clamp(22px,4.2vw,42px);text-shadow:0 3px 0 #0277bd">Tebrikler!</h2>
+    <div class="kart" style="max-width:640px;width:100%">
+      <p id="sonucDetay" style="font-size:clamp(16px,2.4vw,22px);font-weight:800;line-height:1.7"></p>
+      <div id="sonucYildiz" style="font-size:40px;margin-top:8px"></div>
+    </div>
+    <div class="menu-btns">
+      <button class="btn" onclick="sonucDevam()">➡️ Devam</button>
+      <button class="btn turuncu" onclick="sonucTekrar()">🔄 Tekrar Oyna</button>
+      <button class="btn mavi" onclick="ekran('menu')">🏠 Ana Menü</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MİNİ OYUN MENÜSÜ ============ -->
+<section id="miniMenu" class="screen">
+  <div class="topbar">
+    <button class="btn kucuk gri" onclick="ekran('menu')">⬅️ Menü</button>
+    <div class="rozet-kutu">🎯 Mini Oyunlar</div>
+    <div class="rozet-kutu">⭐ <span id="miniToplamPuan">0</span></div>
+  </div>
+  <div class="orta">
+    <div class="harita" id="miniKartlar"></div>
+  </div>
+</section>
+
+<!-- ============ MİNİ OYUN ALANI ============ -->
+<section id="mini" class="screen">
+  <div class="topbar">
+    <button class="btn kucuk gri" onclick="miniBitir()">⬅️ Çık</button>
+    <div class="rozet-kutu" id="miniBaslik">Mini Oyun</div>
+    <div class="rozet-kutu">⭐ <span id="miniPuan">0</span></div>
+    <div class="rozet-kutu">✅ <span id="miniDogruSay">0</span></div>
+    <div class="rozet-kutu">⏱️ <span id="miniSure">-</span></div>
+  </div>
+  <div style="text-align:center;margin:8px 0">
+    <div class="soru-metin" id="miniSoru" style="font-size:clamp(20px,3.6vw,38px);display:inline-block;padding:12px 22px">Hazır ol!</div>
+  </div>
+  <div class="mini-alan" id="miniAlan"></div>
+</section>
+
+<!-- ============ ROZETLER ============ -->
+<section id="rozetler" class="screen">
+  <div class="topbar">
+    <button class="btn kucuk gri" onclick="ekran('menu')">⬅️ Menü</button>
+    <div class="rozet-kutu">🏅 Rozetlerim</div>
+  </div>
+  <div class="orta">
+    <div class="kart" style="max-width:900px;width:100%">
+      <div class="rozet-liste" id="rozetListe"></div>
+      <hr style="margin:16px 0;border:none;border-top:3px dashed #cfd8dc">
+      <p style="font-weight:800;font-size:17px">⭐ Toplam Puan: <span id="rozetPuan">0</span></p>
+      <p style="font-weight:800;font-size:17px">💎 Toplanan Kristal: <span id="rozetKristal">0</span>/6</p>
+      <p style="font-weight:800;font-size:17px">✅ Doğru Cevap: <span id="rozetDogru">0</span></p>
+    </div>
+    <button class="btn gri kucuk" onclick="ilerlemeSifirla()">🗑️ İlerlemeyi Sıfırla</button>
+  </div>
+</section>
+
+<!-- ============ ÖĞRETMEN PANELİ ============ -->
+<section id="ogretmen" class="screen">
+  <div class="topbar noprint">
+    <button class="btn kucuk gri" onclick="ekran('menu')">⬅️ Menü</button>
+    <div class="rozet-kutu">👩‍🏫 Öğretmen Paneli</div>
+    <button class="btn kucuk turuncu" onclick="raporYazdir()">🖨️ PDF Rapor</button>
+  </div>
+  <div style="max-width:920px;margin:12px auto;width:100%">
+    <div class="kart">
+      <h3 style="font-size:21px;margin-bottom:6px">⚙️ Oyun Ayarları</h3>
+      <div class="ayar-satir">
+        <label for="ayarOgrenci">Öğrenci / Sınıf adı</label>
+        <input id="ayarOgrenci" type="text" placeholder="2/A - Ali">
+      </div>
+      <div class="ayar-satir">
+        <label for="ayarSoru">Bölüm başına soru sayısı</label>
+        <select id="ayarSoru">
+          <option value="5">5 soru</option><option value="10">10 soru</option>
+          <option value="15">15 soru</option><option value="20" selected>20 soru</option>
+          <option value="30">30 soru</option>
+        </select>
+      </div>
+      <div class="ayar-satir">
+        <label for="ayarZorluk">Sayı aralığı (kazanım)</label>
+        <select id="ayarZorluk">
+          <option value="20">1 - 20 arası (kolay)</option>
+          <option value="50">1 - 50 arası (orta)</option>
+          <option value="100" selected>1 - 100 arası (MEB hedefi)</option>
+        </select>
+      </div>
+      <div class="ayar-satir">
+        <label for="ayarSure">Soru süresi</label>
+        <select id="ayarSure">
+          <option value="0" selected>Süresiz</option>
+          <option value="15">15 saniye</option><option value="30">30 saniye</option><option value="60">60 saniye</option>
+        </select>
+      </div>
+      <div class="ayar-satir">
+        <label for="ayarKilit">Bölüm kilidi</label>
+        <select id="ayarKilit"><option value="1" selected>Sırayla açılsın</option><option value="0">Hepsi açık olsun</option></select>
+      </div>
+      <div class="ayar-satir">
+        <label for="ayarSes">Ses efektleri</label>
+        <select id="ayarSes"><option value="1" selected>Açık</option><option value="0">Kapalı</option></select>
+      </div>
+      <div class="ayar-satir">
+        <label for="ayarKonus">Sesli yönerge (soruyu okur)</label>
+        <select id="ayarKonus"><option value="0" selected>Kapalı</option><option value="1">Açık</option></select>
+      </div>
+      <div class="ayar-satir" style="border:none">
+        <label>Kazanım seçimi</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <label style="font-weight:700"><input type="checkbox" id="kzTop" checked style="width:21px;height:21px;vertical-align:middle"> Toplama</label>
+          <label style="font-weight:700"><input type="checkbox" id="kzCik" checked style="width:21px;height:21px;vertical-align:middle"> Çıkarma</label>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:12px">
+        <button class="btn kucuk" onclick="ayarKaydet()">💾 Ayarları Kaydet</button>
+      </div>
+    </div>
+
+    <div class="kart" style="margin-top:14px">
+      <h3 style="font-size:21px">📊 Başarı Raporu</h3>
+      <div id="raporOzet" style="font-weight:800;font-size:16px;line-height:1.9;margin-top:6px"></div>
+      <h4 style="margin-top:12px;font-size:18px">📚 Bölüm Bazlı Başarı</h4>
+      <div id="raporBolum"></div>
+      <h4 style="margin-top:12px;font-size:18px">❌ Yanlış Yapılan Sorular</h4>
+      <div id="raporTablo"></div>
+      <div style="text-align:center;margin-top:12px" class="noprint">
+        <button class="btn kucuk gri" onclick="raporTemizle()">🗑️ Raporu Temizle</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+<div id="efekt"></div>
+<div id="yazdirAlan"></div>
+
+<script>
+"use strict";
+/* =========================================================
+   SAYI ADASI MACERASI  v2.0
+   Tek dosya, dış bağlantı yok, çevrimdışı çalışır.
+   ========================================================= */
+
+var KAYIT = "sayiAdasi_v2";
+var S = {
+  bolum:0, qi:0, puan:0, seri:0, sorular:[], yanlisBuSoru:false, bolumDogru:0,
+  ayar:{ soruSayisi:20, aralik:100, sure:0, ses:1, konus:0, ogrenci:"", top:true, cik:true, kilit:1 },
+  kayit:{ toplamPuan:0, kristal:[], yildiz:{}, rozet:{}, dogru:0, yanlis:0, yanlisLog:[],
+          bolumIst:{}, miniRekor:{} }
+};
+
+var BOLUMLER = [
+  {ad:"Orman",            ikon:"🌴", tip:"toplama", aciklama:"Toplama işlemleri"},
+  {ad:"Nehir",            ikon:"🌊", tip:"cikarma", aciklama:"Çıkarma işlemleri"},
+  {ad:"Dağ",              ikon:"⛰️", tip:"karisik", aciklama:"Karışık işlemler"},
+  {ad:"Mağara",           ikon:"🕯️", tip:"eksik",   aciklama:"Eksik sayıyı bul"},
+  {ad:"Gemi",             ikon:"⛵", tip:"uclu",    aciklama:"Üç sayıyla işlem"},
+  {ad:"Kristal Tapınağı", ikon:"💎", tip:"problem", aciklama:"Günlük hayat problemleri"}
+];
+
+var ROZETLER = [
+  {id:"toplama", ad:"🥇 Toplama Ustası",     kosul:"Orman bölümünü %80+ ile bitir"},
+  {id:"cikarma", ad:"🥈 Çıkarma Şampiyonu",  kosul:"Nehir bölümünü %80+ ile bitir"},
+  {id:"kasif",   ad:"🧭 Mağara Kâşifi",      kosul:"Mağara bölümünü %80+ ile bitir"},
+  {id:"kaptan",  ad:"⚓ Gemi Kaptanı",       kosul:"Gemi bölümünü %80+ ile bitir"},
+  {id:"problem", ad:"🏆 Problem Kahramanı",  kosul:"Tapınak bölümünü %80+ ile bitir"},
+  {id:"hizli",   ad:"⭐ Hızlı Matematikçi",  kosul:"Zaman Yarışı'nda 12+ doğru yap"},
+  {id:"nisanci", ad:"🎈 Balon Nişancısı",    kosul:"Balon Patlat'ta 10+ doğru yap"},
+  {id:"hafiza",  ad:"🧠 Hafıza Ustası",      kosul:"Hafıza Kartları'nı tamamla"},
+  {id:"toplayici",ad:"🧺 Usta Toplayıcı",    kosul:"Meyve Sepeti'nde 10+ doğru yap"},
+  {id:"kristal", ad:"💎 Kristal Koruyucusu", kosul:"6 bölümü de tamamla"}
+];
+
+var MINILER = [
+  {id:"balon",  ikon:"🎈", ad:"Balon Patlat",   aciklama:"Doğru sonucu taşıyan balonu patlat", fn:function(){balonBasla();}},
+  {id:"sandik", ikon:"🎁", ad:"Hazine Sandığı", aciklama:"Doğru işlemi seç, sandığı aç",       fn:function(){sandikBasla();}},
+  {id:"kopru",  ikon:"🌉", ad:"Sayı Köprüsü",   aciklama:"Eksik sayıyı bul, köprüyü tamamla",  fn:function(){kopruBasla();}},
+  {id:"yaris",  ikon:"⏱️", ad:"Zaman Yarışı",   aciklama:"60 saniyede kaç soru çözersin?",     fn:function(){yarisBasla();}},
+  {id:"hafiza", ikon:"🧠", ad:"Hafıza Kartları",aciklama:"İşlem ve sonucu eşleştir",           fn:function(){hafizaBasla();}},
+  {id:"sepet",  ikon:"🧺", ad:"Meyve Sepeti",   aciklama:"Doğru sonuçları sepetle yakala",     fn:function(){sepetBasla();}},
+  {id:"dy",     ikon:"⚖️", ad:"Doğru mu Yanlış mı?", aciklama:"Hızlı karar ver",               fn:function(){dyBasla();}},
+  {id:"sirala", ikon:"🔢", ad:"Sayı Sıralama",  aciklama:"Sonuçları küçükten büyüğe sırala",   fn:function(){siralaBasla();}},
+  {id:"blok",   ikon:"🧱", ad:"Onluk – Birlik", aciklama:"Blokları say, sayıyı bul",           fn:function(){blokBasla();}}
+];
+
+/* ---------------- Kayıt ---------------- */
+function kaydet(){ try{ localStorage.setItem(KAYIT, JSON.stringify({kayit:S.kayit, ayar:S.ayar})); }catch(e){} }
+function yukle(){
+  try{
+    var d = JSON.parse(localStorage.getItem(KAYIT)||"null");
+    if(d){
+      if(d.kayit) for(var k in d.kayit) S.kayit[k]=d.kayit[k];
+      if(d.ayar)  for(var a in d.ayar)  S.ayar[a]=d.ayar[a];
+    }
+  }catch(e){}
+  if(!S.kayit.kristal) S.kayit.kristal=[];
+  while(S.kayit.kristal.length < BOLUMLER.length) S.kayit.kristal.push(false);
+  if(!S.kayit.bolumIst) S.kayit.bolumIst={};
+  if(!S.kayit.miniRekor) S.kayit.miniRekor={};
+  if(!S.kayit.yanlisLog) S.kayit.yanlisLog=[];
+  if(!S.kayit.yildiz) S.kayit.yildiz={};
+  if(!S.kayit.rozet) S.kayit.rozet={};
+}
+
+/* ---------------- Ekran ---------------- */
+function ekran(id){
+  var ss=document.querySelectorAll(".screen");
+  for(var i=0;i<ss.length;i++) ss[i].classList.remove("active");
+  document.getElementById(id).classList.add("active");
+  if(id!=="mini") miniTemizle();
+  window.scrollTo(0,0);
+}
+function tamEkran(){
+  if(!document.fullscreenElement){ if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); }
+  else { if(document.exitFullscreen) document.exitFullscreen(); }
+}
+
+/* ---------------- Ses ---------------- */
+var AC=null;
+function ac(){ if(!AC){ try{ AC = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return AC; }
+function ton(freq, sure, tip, gain){
+  if(!S.ayar.ses) return;
+  var c=ac(); if(!c) return;
+  try{
+    var o=c.createOscillator(), g=c.createGain();
+    o.type=tip||"sine"; o.frequency.value=freq;
+    g.gain.setValueAtTime(gain||0.13, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+sure);
+    o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+sure);
+  }catch(e){}
+}
+function sesDogru(){ [523,659,784,1047].forEach(function(f,i){ setTimeout(function(){ton(f,.2,"triangle");},i*75); }); }
+function sesYanlis(){ ton(300,.17,"sawtooth",.09); setTimeout(function(){ton(220,.26,"sawtooth",.09);},140); }
+function sesTik(){ ton(880,.05,"square",.05); }
+function sesPatla(){ ton(140,.16,"sawtooth",.16); ton(500,.08,"square",.08); }
+function sesBolum(){ [523,587,659,784,880,1047].forEach(function(f,i){ setTimeout(function(){ton(f,.28,"triangle");},i*105); }); }
+function konus(metin){
+  if(!S.ayar.konus || !window.speechSynthesis) return;
+  try{
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(String(metin).replace(/\+/g," artı ").replace(/−|-/g," eksi ").replace(/=/g," eşittir ").replace(/___/g," kaç "));
+    u.lang="tr-TR"; u.rate=.9; speechSynthesis.speak(u);
+  }catch(e){}
+}
+function soruyuOku(){
+  var t = document.getElementById("soruMetin").textContent;
+  var eski = S.ayar.konus; S.ayar.konus = 1; konus(t); S.ayar.konus = eski;
+}
+
+/* ---------------- Yardımcılar ---------------- */
+function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function karistir(a){
+  for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+function toplamaUret(max){
+  var a = rnd(10, Math.max(12, max-15));
+  var b = rnd(2, Math.max(3, max-a));
+  return {a:a,b:b,sonuc:a+b,ifade:a+" + "+b,islem:"+"};
+}
+function cikarmaUret(max){
+  var a = rnd(15, max);
+  var b = rnd(2, a-1);
+  return {a:a,b:b,sonuc:a-b,ifade:a+" − "+b,islem:"−"};
+}
+function uretIslem(t,max){ return t==="toplama"?toplamaUret(max):cikarmaUret(max); }
+function rastgeleIslem(max){ return Math.random()<.5?toplamaUret(max):cikarmaUret(max); }
+
+/* Yanlış ama makul (negatif olmayan, doğrudan farklı) bir sonuç üretir */
+function sahteSonuc(dogru){
+  var s, guv=0;
+  do{
+    s = dogru + (Math.random()<.5?-1:1)*rnd(1,9);
+    guv++;
+  } while((s<0 || s===dogru) && guv<40);
+  if(s<0 || s===dogru) s = dogru + rnd(1,9);
+  return s;
+}
+function secenekUret(dogru, adet){
+  adet = adet||3;
+  var set=[dogru], guv=0;
+  while(set.length<adet && guv<200){
+    guv++;
+    var s = dogru + (Math.random()<.5?-1:1)*rnd(1,10);
+    if(s<0) continue;
+    if(set.indexOf(s)<0) set.push(s);
+  }
+  while(set.length<adet) set.push(dogru+set.length);
+  return karistir(set);
+}
+
+var ISIMLER = ["Ayşe","Ali","Zeynep","Mehmet","Elif","Can","Defne","Yusuf","Nehir","Kerem","Duru","Emir","Asya","Mert"];
+var NESNELER = [
+  {ad:"kalem",e:"kalemi"},{ad:"bilye",e:"bilyesi"},{ad:"balon",e:"balonu"},
+  {ad:"şeker",e:"şekeri"},{ad:"kitap",e:"kitabı"},{ad:"çıkartma",e:"çıkartması"},
+  {ad:"misket",e:"misketi"},{ad:"boncuk",e:"boncuğu"},{ad:"ceviz",e:"cevizi"}
+];
+function problemUret(max, tip){
+  var isim = ISIMLER[rnd(0,ISIMLER.length-1)];
+  var isim2 = ISIMLER[rnd(0,ISIMLER.length-1)];
+  var n = NESNELER[rnd(0,NESNELER.length-1)];
+  var g, kaliplar;
+  if(tip==="toplama"){
+    g = toplamaUret(max);
+    kaliplar = [
+      isim+"'in "+g.a+" "+n.e+" vardı. Annesi ona "+g.b+" "+n.ad+" daha aldı. "+isim+"'in kaç "+n.ad+"i oldu?",
+      "Bir sepette "+g.a+" "+n.ad+", diğer sepette "+g.b+" "+n.ad+" var. Toplam kaç "+n.ad+" vardır?",
+      isim+" sabah "+g.a+", öğleden sonra "+g.b+" "+n.ad+" topladı. Toplam kaç "+n.ad+" topladı?",
+      "Sınıfta "+g.a+" kırmızı, "+g.b+" mavi "+n.ad+" var. Toplam kaç "+n.ad+" vardır?"
+    ];
+  } else {
+    g = cikarmaUret(max);
+    kaliplar = [
+      isim+"'in "+g.a+" "+n.e+" vardı. "+g.b+" tanesini "+isim2+"'e verdi. Kaç "+n.ad+"i kaldı?",
+      "Ağaçta "+g.a+" "+n.ad+" vardı. "+g.b+" tanesi düştü. Ağaçta kaç "+n.ad+" kaldı?",
+      isim+" "+g.a+" "+n.e+" arasından "+g.b+" tanesini kullandı. Geriye kaç "+n.ad+" kaldı?",
+      "Kutuda "+g.a+" "+n.ad+" vardı. "+g.b+" tanesi satıldı. Kutuda kaç "+n.ad+" kaldı?"
+    ];
+  }
+  return {metin:kaliplar[rnd(0,kaliplar.length-1)], sonuc:g.sonuc, islem:g.ifade};
+}
+
+function izinliTip(bolumTip){
+  var izin=[];
+  if(S.ayar.top) izin.push("toplama");
+  if(S.ayar.cik) izin.push("cikarma");
+  if(!izin.length) izin=["toplama","cikarma"];
+  if(bolumTip==="toplama") return izin.indexOf("toplama")>=0?"toplama":izin[0];
+  if(bolumTip==="cikarma") return izin.indexOf("cikarma")>=0?"cikarma":izin[0];
+  return izin[rnd(0,izin.length-1)];
+}
+
+/* ---------------- Soru üretimi ---------------- */
+function soruUret(bolumTip, index){
+  var max = S.ayar.aralik, t, g;
+
+  if(bolumTip==="problem"){
+    t = izinliTip("karisik");
+    var p = problemUret(max, t);
+    return {tip:"mc", tipAd:"Günlük Hayat Problemi", metin:p.metin, dogru:p.sonuc,
+      secenekler:secenekUret(p.sonuc),
+      ipucu:"İpucu: Bu problemde "+p.islem+" işlemini yapmalısın."};
+  }
+
+  if(bolumTip==="eksik"){
+    t = izinliTip("karisik");
+    g = uretIslem(t,max);
+    var solMu = Math.random()<.5, metin, cevap;
+    if(t==="toplama"){
+      if(solMu){ metin = "___ + "+g.b+" = "+g.sonuc; cevap=g.a; }
+      else     { metin = g.a+" + ___ = "+g.sonuc;    cevap=g.b; }
+    } else {
+      if(solMu){ metin = "___ − "+g.b+" = "+g.sonuc; cevap=g.a; }
+      else     { metin = g.a+" − ___ = "+g.sonuc;    cevap=g.b; }
+    }
+    var tur = (index%2===0) ? "mc" : "fill";
+    return {tip:tur, tipAd:"Eksik Sayıyı Bul", metin:metin, dogru:cevap,
+      secenekler:secenekUret(cevap),
+      ipucu:"İpucu: Toplama ile çıkarma birbirinin tersidir. "+
+            (t==="toplama" ? (g.sonuc+" − "+(solMu?g.b:g.a)+" işlemini yap.") : "Bilinen sayıları kullanarak ters işlem yap.")};
+  }
+
+  if(bolumTip==="uclu"){
+    var a=rnd(5,Math.floor(max/3)), b=rnd(3,Math.floor(max/3)), c=rnd(2,Math.floor(max/3));
+    var karma = Math.random()<.5;
+    var metin2, sonuc2;
+    if(karma){ metin2 = a+" + "+b+" + "+c; sonuc2 = a+b+c; }
+    else {
+      var top=a+b; if(top-c<0) c=rnd(1,top);
+      metin2 = a+" + "+b+" − "+c; sonuc2 = a+b-c;
+    }
+    var tur2 = (index%3===2) ? "fill" : "mc";
+    return {tip:tur2, tipAd:"Üç Sayıyla İşlem", metin:metin2+" = ?", dogru:sonuc2,
+      secenekler:secenekUret(sonuc2),
+      ipucu:"İpucu: Soldan sağa doğru ikişer ikişer işlem yap. Önce "+a+" ile "+b+"."};
+  }
+
+  t = izinliTip(bolumTip);
+  g = uretIslem(t,max);
+  var sira = ["mc","mc","tf","fill","match"][index % 5];
+
+  if(sira==="mc"){
+    return {tip:"mc", tipAd:"Çoktan Seçmeli", metin:g.ifade+" = ?", dogru:g.sonuc, secenekler:secenekUret(g.sonuc),
+      ipucu:"İpucu: Önce onlukları, sonra birlikleri "+(t==="toplama"?"topla":"çıkar")+"."};
+  }
+  if(sira==="tf"){
+    var dogruMu = Math.random()<.5;
+    var gosterilen = dogruMu ? g.sonuc : sahteSonuc(g.sonuc);
+    return {tip:"tf", tipAd:"Doğru / Yanlış", metin:g.ifade+" = "+gosterilen, dogru: dogruMu?"D":"Y",
+      ipucu:"İpucu: İşlemi kendin yap, sonra sonucu karşılaştır."};
+  }
+  if(sira==="fill"){
+    return {tip:"fill", tipAd:"Boşluk Doldurma", metin:g.ifade+" = ___", dogru:g.sonuc,
+      ipucu:"İpucu: "+(t==="toplama" ? "Onlukları topla, birlikleri topla, sonra birleştir."
+                                     : "Önce onlukları çıkar, sonra birlikleri çıkar.")};
+  }
+  var ciftler=[], guv=0;
+  while(ciftler.length<3 && guv<150){
+    guv++;
+    var x = uretIslem(t,max);
+    var varMi=false;
+    for(var i=0;i<ciftler.length;i++) if(ciftler[i].sonuc===x.sonuc) varMi=true;
+    if(!varMi) ciftler.push(x);
+  }
+  return {tip:"match", tipAd:"Eşleştirme", metin:"İşlemleri doğru sonuçlarıyla eşleştir!", ciftler:ciftler,
+    ipucu:"İpucu: Önce kolay bulduğun işlemi eşleştir.", dogru:"eslesme"};
+}
+
+function bolumSorulariUret(i){
+  var tip = BOLUMLER[i].tip, n = S.ayar.soruSayisi, list=[];
+  for(var k=0;k<n;k++) list.push(soruUret(tip,k));
+  return list;
+}
+
+/* ---------------- Harita ---------------- */
+function haritaAc(){
+  ekran("harita");
+  var el = document.getElementById("haritaKartlar");
+  el.innerHTML = "";
+  BOLUMLER.forEach(function(b,i){
+    var kilitli = S.ayar.kilit && i>0 && !S.kayit.kristal[i-1];
+    var yildiz = S.kayit.yildiz[i]||0;
+    var d = document.createElement("div");
+    d.className = "bolum-kart" + (kilitli?" kilitli":"") + (S.kayit.kristal[i]?" tamam":"");
+    d.innerHTML = '<div class="ikon">'+(kilitli?"🔒":b.ikon)+'</div>'+
+      '<h3>Bölüm '+(i+1)+': '+b.ad+'</h3>'+
+      '<p>'+b.aciklama+' • '+S.ayar.soruSayisi+' soru</p>'+
+      '<div class="yildizlar">'+(repeat("⭐",yildiz)+repeat("☆",3-yildiz))+'</div>';
+    if(!kilitli) d.onclick = function(){ bolumBasla(i); };
+    el.appendChild(d);
+  });
+  document.getElementById("kristalSayi").textContent = sayKristal();
+  document.getElementById("toplamPuan").textContent = S.kayit.toplamPuan;
+}
+function repeat(s,n){ var o=""; for(var i=0;i<n;i++) o+=s; return o; }
+function sayKristal(){ var c=0; for(var i=0;i<S.kayit.kristal.length;i++) if(S.kayit.kristal[i]) c++; return c; }
+
+/* ---------------- Oyun akışı ---------------- */
+var sayacId=null, kalanSure=0;
+function bolumBasla(i){
+  S.bolum=i; S.qi=0; S.puan=0; S.seri=0; S.bolumDogru=0;
+  S.sorular = bolumSorulariUret(i);
+  document.getElementById("soruTop").textContent = S.sorular.length;
+  ekran("oyun");
+  soruGoster();
+}
+function cikisOnay(){ sayacDurdur(); haritaAc(); }
+function sayacDurdur(){ if(sayacId){ clearInterval(sayacId); sayacId=null; } }
+function sayacBaslat(){
+  sayacDurdur();
+  var sn = parseInt(S.ayar.sure)||0;
+  var kutu = document.getElementById("sureKutu");
+  if(!sn){ kutu.style.display="none"; return; }
+  kutu.style.display="flex"; kalanSure=sn;
+  document.getElementById("sure").textContent = kalanSure;
+  sayacId = setInterval(function(){
+    kalanSure--;
+    document.getElementById("sure").textContent = kalanSure;
+    if(kalanSure<=0){ sayacDurdur(); yanlisIsle(null,"⏰ Süre doldu! Tekrar dene."); }
+  },1000);
+}
+
+function soruGoster(){
+  var q = S.sorular[S.qi];
+  S.yanlisBuSoru = false;
+  document.getElementById("soruNo").textContent = S.qi+1;
+  document.getElementById("puan").textContent = S.puan;
+  document.getElementById("seri").textContent = S.seri;
+  document.getElementById("ipucu").style.display="none";
+  document.getElementById("soruTip").textContent = q.tipAd;
+  document.getElementById("soruMetin").textContent = q.metin;
+  document.getElementById("ilerlemeCubuk").style.width = (S.qi/S.sorular.length*100)+"%";
+  var alan = document.getElementById("cevapAlan");
+  alan.innerHTML="";
+
+  if(q.tip==="mc"){
+    var g1 = document.createElement("div"); g1.className="secenekler";
+    var harf=["A","B","C","D"];
+    q.secenekler.forEach(function(s,i){
+      var b=document.createElement("button"); b.className="secenek"; b.textContent=harf[i]+") "+s;
+      b.onclick=function(){ sesTik(); if(s===q.dogru) dogruIsle(b); else yanlisIsle(b); };
+      g1.appendChild(b);
+    });
+    alan.appendChild(g1);
+  }
+  else if(q.tip==="tf"){
+    var g2 = document.createElement("div"); g2.className="secenekler"; g2.style.maxWidth="620px";
+    [["D","✅ DOĞRU"],["Y","❌ YANLIŞ"]].forEach(function(p){
+      var b=document.createElement("button"); b.className="secenek"; b.textContent=p[1];
+      b.onclick=function(){ sesTik(); if(p[0]===q.dogru) dogruIsle(b); else yanlisIsle(b); };
+      g2.appendChild(b);
+    });
+    alan.appendChild(g2);
+  }
+  else if(q.tip==="fill"){
+    var girdi="";
+    var kutu=document.createElement("div"); kutu.className="cevap-kutu"; kutu.textContent="?";
+    var pad=document.createElement("div"); pad.className="tus-takimi";
+    function yaz(){ kutu.textContent = girdi===""?"?":girdi; }
+    for(var n=1;n<=9;n++){
+      (function(n){
+        var t=document.createElement("button"); t.className="tus"; t.textContent=n;
+        t.onclick=function(){ sesTik(); if(girdi.length<3){ girdi+=n; yaz(); } };
+        pad.appendChild(t);
+      })(n);
+    }
+    var t0=document.createElement("button"); t0.className="tus"; t0.textContent="0";
+    t0.onclick=function(){ sesTik(); if(girdi.length<3 && girdi!==""){ girdi+="0"; yaz(); } };
+    pad.appendChild(t0);
+    var ts=document.createElement("button"); ts.className="tus sil"; ts.textContent="⌫";
+    ts.onclick=function(){ sesTik(); girdi=girdi.slice(0,-1); yaz(); };
+    pad.appendChild(ts);
+    var tk=document.createElement("button"); tk.className="tus ok"; tk.textContent="✔"; tk.style.gridColumn="span 3";
+    tk.onclick=function(){
+      if(girdi==="") return;
+      sesTik();
+      if(parseInt(girdi,10)===q.dogru) dogruIsle(kutu);
+      else { yanlisIsle(kutu); girdi=""; yaz(); }
+    };
+    pad.appendChild(tk);
+    alan.appendChild(kutu); alan.appendChild(pad);
+  }
+  else if(q.tip==="match"){
+    var sol = karistir(q.ciftler.slice());
+    var sag = karistir(q.ciftler.slice());
+    var grid=document.createElement("div"); grid.className="eslestir";
+    var seciliSol=null, kalan=q.ciftler.length;
+    var solKol=document.createElement("div"), sagKol=document.createElement("div");
+    solKol.style.display=sagKol.style.display="flex";
+    solKol.style.flexDirection=sagKol.style.flexDirection="column";
+    solKol.style.gap=sagKol.style.gap="11px";
+    sol.forEach(function(c){
+      var b=document.createElement("button"); b.className="es-kart"; b.textContent=c.ifade;
+      b.onclick=function(){
+        sesTik();
+        var hepsi=solKol.querySelectorAll(".es-kart");
+        for(var i=0;i<hepsi.length;i++) hepsi[i].classList.remove("secili");
+        b.classList.add("secili"); seciliSol={el:b,val:c.sonuc};
+      };
+      solKol.appendChild(b);
+    });
+    sag.forEach(function(c){
+      var b=document.createElement("button"); b.className="es-kart sag"; b.textContent=c.sonuc;
+      b.onclick=function(){
+        if(!seciliSol){ sesTik(); return; }
+        if(seciliSol.val===c.sonuc){
+          sesDogru(); seciliSol.el.classList.add("bitti"); b.classList.add("bitti");
+          seciliSol=null; kalan--;
+          if(kalan===0) dogruIsle(null);
+        } else {
+          sesYanlis(); b.classList.add("yanlis");
+          setTimeout(function(){ b.classList.remove("yanlis"); },400);
+          yanlisIsle(null);
+        }
+      };
+      sagKol.appendChild(b);
+    });
+    grid.appendChild(solKol); grid.appendChild(sagKol);
+    alan.appendChild(grid);
+  }
+  konus(q.metin);
+  sayacBaslat();
+}
+
+function dogruIsle(el){
+  sayacDurdur();
+  if(el) el.classList.add("dogru");
+  sesDogru();
+  var kazanc = S.yanlisBuSoru ? 50 : 100;
+  S.seri = S.yanlisBuSoru ? 0 : S.seri+1;
+  var bonus = (S.seri>0 && S.seri%3===0) ? 50 : 0;
+  S.puan += kazanc + bonus;
+  if(!S.yanlisBuSoru){ S.kayit.dogru++; S.bolumDogru++; }
+  document.getElementById("puan").textContent = S.puan;
+  document.getElementById("seri").textContent = S.seri;
+  mesaj(bonus ? "🔥 Seri Bonus! +"+(kazanc+bonus) : ["Harika! 🎉","Süper! ⭐","Bravo! 👏","Doğru! ✅"][rnd(0,3)]);
+  konfeti(bonus?40:16);
+  kaydet();
+  setTimeout(function(){
+    S.qi++;
+    if(S.qi >= S.sorular.length) bolumBitir();
+    else soruGoster();
+  }, 1000);
+}
+
+function yanlisIsle(el, ozelMesaj){
+  sayacDurdur();
+  if(el){ el.classList.add("yanlis"); setTimeout(function(){ el.classList.remove("yanlis"); },500); }
+  sesYanlis();
+  if(!S.yanlisBuSoru){
+    S.kayit.yanlis++;
+    var q = S.sorular[S.qi];
+    S.kayit.yanlisLog.unshift({
+      bolum: BOLUMLER[S.bolum] ? BOLUMLER[S.bolum].ad : "-",
+      soru: q.metin, tip: q.tipAd,
+      dogru: (q.tip==="match" ? "Eşleştirme" : q.dogru),
+      tarih: new Date().toLocaleString("tr-TR")
+    });
+    if(S.kayit.yanlisLog.length>200) S.kayit.yanlisLog.length=200;
+  }
+  S.yanlisBuSoru = true; S.seri = 0;
+  document.getElementById("seri").textContent = 0;
+  var ip = document.getElementById("ipucu");
+  ip.textContent = ozelMesaj || ("💡 " + (S.sorular[S.qi].ipucu||"Tekrar dene, yapabilirsin!"));
+  ip.style.display="block";
+  mesaj("Tekrar dene! 💪");
+  kaydet();
+  if(parseInt(S.ayar.sure)) sayacBaslat();
+}
+
+var sonSonucTipi="bolum";
+function bolumBitir(){
+  sayacDurdur();
+  sonSonucTipi="bolum";
+  var toplam=S.sorular.length, dogruSayi=S.bolumDogru||0;
+  var oran = Math.round(dogruSayi/toplam*100);
+  var yildiz = oran>=90?3:oran>=70?2:oran>=50?1:0;
+  S.puan += 500;
+  S.kayit.toplamPuan += S.puan;
+  S.kayit.kristal[S.bolum] = true;
+  S.kayit.yildiz[S.bolum] = Math.max(S.kayit.yildiz[S.bolum]||0, yildiz);
+  var ist = S.kayit.bolumIst[S.bolum] || {oyun:0,dogru:0,soru:0,enIyi:0};
+  ist.oyun++; ist.dogru+=dogruSayi; ist.soru+=toplam; ist.enIyi=Math.max(ist.enIyi,oran);
+  S.kayit.bolumIst[S.bolum]=ist;
+
+  var rozetId = ["toplama","cikarma",null,"kasif","kaptan","problem"][S.bolum];
+  if(rozetId && oran>=80) rozetVer(rozetId);
+  var hepsi=true;
+  for(var i=0;i<BOLUMLER.length;i++) if(!S.kayit.kristal[i]) hepsi=false;
+  if(hepsi) rozetVer("kristal");
+  kaydet();
+  sesBolum(); konfeti(90);
+
+  document.getElementById("sonucIkon").textContent = yildiz===3?"🏆":yildiz===2?"🎉":yildiz===1?"👍":"💪";
+  document.getElementById("sonucBaslik").textContent = "Bölüm "+(S.bolum+1)+" Tamamlandı!";
+  document.getElementById("sonucDetay").innerHTML =
+    "💎 Kurtarılan kristal: <b>"+BOLUMLER[S.bolum].ad+"</b><br>"+
+    "✅ İlk denemede doğru: <b>"+dogruSayi+" / "+toplam+"</b> (%"+oran+")<br>"+
+    "⭐ Bölüm puanı: <b>"+S.puan+"</b> (500 bitirme bonusu dahil)<br>"+
+    "🏅 Toplam puanın: <b>"+S.kayit.toplamPuan+"</b>";
+  document.getElementById("sonucYildiz").textContent = repeat("⭐",yildiz)+repeat("☆",3-yildiz);
+  ekran("sonuc");
+}
+function sonucDevam(){ if(sonSonucTipi==="bolum") haritaAc(); else ekran("miniMenu"); }
+function sonucTekrar(){ if(sonSonucTipi==="bolum") bolumBasla(S.bolum); else miniTekrar(); }
+
+function rozetVer(id){
+  if(S.kayit.rozet[id]) return;
+  S.kayit.rozet[id]=true; kaydet();
+  var r=null;
+  for(var i=0;i<ROZETLER.length;i++) if(ROZETLER[i].id===id) r=ROZETLER[i];
+  if(r) setTimeout(function(){ mesaj("Yeni Rozet: "+r.ad, 2200); }, 700);
+}
+
+/* ---------------- Efektler ---------------- */
+function mesaj(metin, sure){
+  var d=document.createElement("div"); d.className="mesaj-balon"; d.textContent=metin;
+  document.body.appendChild(d);
+  setTimeout(function(){
+    d.style.transition="opacity .3s"; d.style.opacity=0;
+    setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); },300);
+  }, sure||850);
+}
+function konfeti(adet){
+  var renk=["#fdd835","#43a047","#1e88e5","#fb8c00","#e53935","#7b1fa2","#00bcd4"];
+  var kap=document.getElementById("efekt");
+  for(var i=0;i<adet;i++){
+    (function(){
+      var k=document.createElement("div"); k.className="konfeti";
+      k.style.left=Math.random()*100+"vw"; k.style.top="-30px";
+      k.style.background=renk[rnd(0,renk.length-1)];
+      k.style.animationDelay=(Math.random()*.6)+"s";
+      kap.appendChild(k);
+      setTimeout(function(){ if(k.parentNode) k.parentNode.removeChild(k); },3200);
+    })();
+  }
+}
+
+/* ---------------- Rozet ekranı ---------------- */
+function rozetleriGoster(){
+  var el=document.getElementById("rozetListe"); el.innerHTML="";
+  ROZETLER.forEach(function(r){
+    var d=document.createElement("div");
+    d.className="rozet"+(S.kayit.rozet[r.id]?" acik":"");
+    d.innerHTML = r.ad + '<br><span style="font-size:12px;font-weight:600">'+(S.kayit.rozet[r.id]?"Kazanıldı!":r.kosul)+'</span>';
+    el.appendChild(d);
+  });
+  document.getElementById("rozetPuan").textContent=S.kayit.toplamPuan;
+  document.getElementById("rozetKristal").textContent=sayKristal();
+  document.getElementById("rozetDogru").textContent=S.kayit.dogru;
+  ekran("rozetler");
+}
+function ilerlemeSifirla(){
+  if(!confirm("Tüm ilerleme, puan ve rozetler silinecek. Emin misin?")) return;
+  S.kayit = {toplamPuan:0,kristal:[],yildiz:{},rozet:{},dogru:0,yanlis:0,yanlisLog:[],bolumIst:{},miniRekor:{}};
+  while(S.kayit.kristal.length<BOLUMLER.length) S.kayit.kristal.push(false);
+  kaydet(); rozetleriGoster(); mesaj("İlerleme sıfırlandı");
+}
+
+/* =========================================================
+   MİNİ OYUNLAR  (9 adet)
+   ========================================================= */
+var M = { timer:null, spawn:null, raf:null, puan:0, sure:0, dogru:0, aktif:null, temizle:null };
+
+function miniMenuAc(){
+  var el=document.getElementById("miniKartlar"); el.innerHTML="";
+  MINILER.forEach(function(m){
+    var rek = S.kayit.miniRekor[m.id]||0;
+    var d=document.createElement("div"); d.className="bolum-kart";
+    d.innerHTML='<div class="ikon">'+m.ikon+'</div><h3>'+m.ad+'</h3><p>'+m.aciklama+'</p>'+
+      '<div class="yildizlar" style="font-size:15px;font-weight:800;color:#ef6c00">🏆 Rekor: '+rek+'</div>';
+    d.onclick=m.fn;
+    el.appendChild(d);
+  });
+  document.getElementById("miniToplamPuan").textContent=S.kayit.toplamPuan;
+  ekran("miniMenu");
+}
+
+function miniTemizle(){
+  if(M.timer){ clearInterval(M.timer); M.timer=null; }
+  if(M.spawn){ clearInterval(M.spawn); M.spawn=null; }
+  if(M.raf){ cancelAnimationFrame(M.raf); M.raf=null; }
+  if(M.temizle){ try{ M.temizle(); }catch(e){} M.temizle=null; }
+  var alan=document.getElementById("miniAlan");
+  if(alan) alan.innerHTML="";
+}
+function miniHazirla(id, baslik, sureSn){
+  miniTemizle();
+  M.aktif=id; M.puan=0; M.dogru=0; M.sure=sureSn||0;
+  document.getElementById("miniBaslik").textContent=baslik;
+  document.getElementById("miniPuan").textContent="0";
+  document.getElementById("miniDogruSay").textContent="0";
+  document.getElementById("miniSure").textContent = sureSn?sureSn:"∞";
+  document.getElementById("miniSoru").textContent="Hazır ol!";
+  ekran("mini");
+  if(sureSn){
+    M.timer=setInterval(function(){
+      M.sure--;
+      document.getElementById("miniSure").textContent=M.sure;
+      if(M.sure<=0) miniBitirSkor();
+    },1000);
+  }
+}
+function miniBitir(){ miniTemizle(); miniMenuAc(); }
+function miniTekrar(){
+  var m=null;
+  for(var i=0;i<MINILER.length;i++) if(MINILER[i].id===M.aktif) m=MINILER[i];
+  if(m) m.fn(); else miniMenuAc();
+}
+function miniSkor(n){
+  M.puan+=n; M.dogru++;
+  document.getElementById("miniPuan").textContent=M.puan;
+  document.getElementById("miniDogruSay").textContent=M.dogru;
+}
+function miniSoruYaz(t){ document.getElementById("miniSoru").textContent=t; konus(t); }
+function miniBitirSkor(){
+  var id=M.aktif, puan=M.puan, dogru=M.dogru;
+  miniTemizle();
+  sonSonucTipi="mini";
+  M.aktif=id;
+  S.kayit.toplamPuan += puan;
+  if(!S.kayit.miniRekor[id] || dogru>S.kayit.miniRekor[id]) S.kayit.miniRekor[id]=dogru;
+  if(id==="yaris"  && dogru>=12) rozetVer("hizli");
+  if(id==="balon"  && dogru>=10) rozetVer("nisanci");
+  if(id==="sepet"  && dogru>=10) rozetVer("toplayici");
+  kaydet();
+  konfeti(60); sesBolum();
+  document.getElementById("sonucIkon").textContent="🎯";
+  document.getElementById("sonucBaslik").textContent="Mini Oyun Bitti!";
+  document.getElementById("sonucDetay").innerHTML =
+    "⭐ Kazandığın puan: <b>"+puan+"</b><br>✅ Doğru sayısı: <b>"+dogru+"</b><br>"+
+    "🏆 Rekorun: <b>"+S.kayit.miniRekor[id]+"</b><br>🏅 Toplam puanın: <b>"+S.kayit.toplamPuan+"</b>";
+  document.getElementById("sonucYildiz").textContent = dogru>=12?"⭐⭐⭐":dogru>=7?"⭐⭐":"⭐";
+  ekran("sonuc");
+}
+
+/* ---- 1) BALON PATLAT (yeniden yazıldı: JS animasyon + dokunmatik) ---- */
+function balonBasla(){
+  miniHazirla("balon","🎈 Balon Patlat",60);
+  var alan=document.getElementById("miniAlan");
+  var renkler=["#e53935","#1e88e5","#43a047","#fb8c00","#8e24aa","#00acc1","#d81b60"];
+  var balonlar=[], hedef=0, sonZaman=0, spawnBirikim=0;
+
+  function yeniSoru(){
+    var g = rastgeleIslem(S.ayar.aralik);
+    hedef = g.sonuc;
+    miniSoruYaz(g.ifade+" = ?");
+  }
+  function balonEkle(){
+    var h=alan.clientHeight, w=alan.clientWidth;
+    if(h<50||w<50) return;
+    var dogruMu = Math.random()<0.45;
+    var deger = dogruMu ? hedef : Math.max(0, hedef + (Math.random()<.5?-1:1)*rnd(1,12));
+    if(!dogruMu && deger===hedef) deger = hedef+rnd(1,5);
+    var b=document.createElement("div");
+    b.className="balon";
+    b.textContent=deger;
+    b.style.background=renkler[rnd(0,renkler.length-1)];
+    var nesne={el:b, x:rnd(6,Math.max(8,w-100)), y:h+10, hiz:rnd(35,75)/1000, deger:deger, oldu:false};
+    b.style.left=nesne.x+"px";
+    b.style.top=nesne.y+"px";
+    b.addEventListener("pointerdown", function(ev){
+      ev.preventDefault(); ev.stopPropagation();
+      if(nesne.oldu) return;
+      nesne.oldu=true;
+      if(nesne.deger===hedef){
+        sesPatla(); sesDogru(); miniSkor(100);
+        b.classList.add("patla");
+        for(var i=0;i<balonlar.length;i++){
+          if(balonlar[i]!==nesne && !balonlar[i].oldu){ balonlar[i].oldu=true; balonlar[i].el.classList.add("sonme"); }
+        }
+        yeniSoru();
+      } else {
+        sesYanlis();
+        b.classList.add("sonme");
+        M.puan = Math.max(0, M.puan-20);
+        document.getElementById("miniPuan").textContent=M.puan;
+      }
+      setTimeout(function(){ if(b.parentNode) b.parentNode.removeChild(b); },340);
+    });
+    alan.appendChild(b);
+    balonlar.push(nesne);
+  }
+  function dongu(zaman){
+    if(!sonZaman) sonZaman=zaman;
+    var dt = Math.min(60, zaman-sonZaman); sonZaman=zaman;
+    spawnBirikim += dt;
+    if(spawnBirikim>850){ spawnBirikim=0; balonEkle(); }
+    for(var i=balonlar.length-1;i>=0;i--){
+      var n=balonlar[i];
+      if(n.oldu){
+        if(!n.el.parentNode) balonlar.splice(i,1);
+        continue;
+      }
+      n.y -= n.hiz*dt*2.2;
+      n.el.style.top = n.y+"px";
+      if(n.y < -130){
+        if(n.el.parentNode) n.el.parentNode.removeChild(n.el);
+        balonlar.splice(i,1);
+      }
+    }
+    M.raf=requestAnimationFrame(dongu);
+  }
+  M.temizle=function(){ balonlar=[]; };
+  yeniSoru();
+  balonEkle(); balonEkle();
+  M.raf=requestAnimationFrame(dongu);
+}
+
+/* ---- 2) HAZİNE SANDIĞI ---- */
+function sandikBasla(){
+  miniHazirla("sandik","🎁 Hazine Sandığı",60);
+  var alan=document.getElementById("miniAlan");
+  function tur(){
+    alan.innerHTML="";
+    var dogruG = rastgeleIslem(S.ayar.aralik), hedef=dogruG.sonuc;
+    miniSoruYaz("Sonucu "+hedef+" olan sandığı aç!");
+    var secim=[dogruG], guv=0;
+    while(secim.length<3 && guv<200){
+      guv++;
+      var g=rastgeleIslem(S.ayar.aralik);
+      if(g.sonuc!==hedef) secim.push(g);
+    }
+    karistir(secim);
+    var kap=document.createElement("div"); kap.className="mini-orta";
+    secim.forEach(function(g){
+      var d=document.createElement("div"); d.style.textAlign="center";
+      d.innerHTML='<div class="sandik">🎁</div><div class="sandik-metin">'+g.ifade+'</div>';
+      d.onclick=function(){
+        if(g.sonuc===hedef){
+          sesDogru(); miniSkor(100);
+          d.querySelector(".sandik").textContent="💎"; konfeti(18);
+          setTimeout(tur,650);
+        } else {
+          sesYanlis(); d.querySelector(".sandik").textContent="💣"; d.style.opacity=.4;
+        }
+      };
+      kap.appendChild(d);
+    });
+    alan.appendChild(kap);
+  }
+  tur();
+}
+
+/* ---- 3) SAYI KÖPRÜSÜ ---- */
+function kopruBasla(){
+  miniHazirla("kopru","🌉 Sayı Köprüsü",60);
+  var alan=document.getElementById("miniAlan");
+  function tur(){
+    alan.innerHTML="";
+    var g=rastgeleIslem(S.ayar.aralik), solMu=Math.random()<.5, metin, cevap;
+    if(g.islem==="+"){
+      if(solMu){ metin="___ + "+g.b+" = "+g.sonuc; cevap=g.a; }
+      else     { metin=g.a+" + ___ = "+g.sonuc;    cevap=g.b; }
+    } else {
+      if(solMu){ metin="___ − "+g.b+" = "+g.sonuc; cevap=g.a; }
+      else     { metin=g.a+" − ___ = "+g.sonuc;    cevap=g.b; }
+    }
+    miniSoruYaz("🌉 "+metin);
+    var kap=document.createElement("div"); kap.className="mini-orta";
+    secenekUret(cevap).forEach(function(s){
+      var b=document.createElement("button"); b.className="secenek"; b.style.minWidth="140px"; b.textContent=s;
+      b.onclick=function(){
+        if(s===cevap){ sesDogru(); miniSkor(100); b.classList.add("dogru"); konfeti(16); setTimeout(tur,600); }
+        else { sesYanlis(); b.classList.add("yanlis"); b.disabled=true; }
+      };
+      kap.appendChild(b);
+    });
+    alan.appendChild(kap);
+  }
+  tur();
+}
+
+/* ---- 4) ZAMAN YARIŞI ---- */
+function yarisBasla(){
+  miniHazirla("yaris","⏱️ Zaman Yarışı",60);
+  var alan=document.getElementById("miniAlan");
+  function tur(){
+    alan.innerHTML="";
+    var g=rastgeleIslem(S.ayar.aralik);
+    miniSoruYaz(g.ifade+" = ?");
+    var kap=document.createElement("div"); kap.className="mini-orta";
+    secenekUret(g.sonuc).forEach(function(s){
+      var b=document.createElement("button"); b.className="secenek"; b.style.minWidth="140px"; b.textContent=s;
+      b.onclick=function(){
+        if(s===g.sonuc){ sesDogru(); miniSkor(100); b.classList.add("dogru"); setTimeout(tur,300); }
+        else { sesYanlis(); b.classList.add("yanlis"); b.disabled=true; }
+      };
+      kap.appendChild(b);
+    });
+    alan.appendChild(kap);
+  }
+  tur();
+}
+
+/* ---- 5) HAFIZA KARTLARI ---- */
+function hafizaBasla(){
+  miniHazirla("hafiza","🧠 Hafıza Kartları",90);
+  var alan=document.getElementById("miniAlan");
+  var ciftSayisi=6, ciftler=[], guv=0;
+  while(ciftler.length<ciftSayisi && guv<300){
+    guv++;
+    var g=rastgeleIslem(S.ayar.aralik), varMi=false;
+    for(var i=0;i<ciftler.length;i++) if(ciftler[i].sonuc===g.sonuc) varMi=true;
+    if(!varMi) ciftler.push(g);
+  }
+  var kartlar=[];
+  ciftler.forEach(function(g,i){
+    kartlar.push({grup:i, yazi:g.ifade});
+    kartlar.push({grup:i, yazi:String(g.sonuc)});
+  });
+  karistir(kartlar);
+  miniSoruYaz("İşlemi sonucuyla eşleştir ("+ciftSayisi+" çift)");
+  var grid=document.createElement("div"); grid.className="hafiza-grid";
+  var acik=[], kilit=false, bulunan=0;
+  kartlar.forEach(function(k){
+    var b=document.createElement("button"); b.className="hkart"; b.textContent="?";
+    b.onclick=function(){
+      if(kilit || b.classList.contains("acik") || b.classList.contains("bulundu")) return;
+      sesTik();
+      b.classList.add("acik"); b.textContent=k.yazi; acik.push({el:b,k:k});
+      if(acik.length===2){
+        kilit=true;
+        var a1=acik[0], a2=acik[1];
+        if(a1.k.grup===a2.k.grup && a1.el!==a2.el){
+          setTimeout(function(){
+            sesDogru(); miniSkor(150); konfeti(14);
+            a1.el.className="hkart bulundu"; a2.el.className="hkart bulundu";
+            acik=[]; kilit=false; bulunan++;
+            if(bulunan===ciftSayisi){
+              rozetVer("hafiza");
+              M.puan+=300; document.getElementById("miniPuan").textContent=M.puan;
+              setTimeout(miniBitirSkor,600);
+            }
+          },350);
+        } else {
+          setTimeout(function(){
+            sesYanlis();
+            a1.el.className="hkart"; a1.el.textContent="?";
+            a2.el.className="hkart"; a2.el.textContent="?";
+            acik=[]; kilit=false;
+          },800);
+        }
+      }
+    };
+    grid.appendChild(b);
+  });
+  alan.appendChild(grid);
+}
+
+/* ---- 6) MEYVE SEPETİ (yakalama) ---- */
+function sepetBasla(){
+  miniHazirla("sepet","🧺 Meyve Sepeti",60);
+  var alan=document.getElementById("miniAlan");
+  var meyveler=["🍎","🍊","🍌","🍇","🍓","🍍"];
+  var renkler=["#e53935","#fb8c00","#fdd835","#8e24aa","#e91e63","#43a047"];
+  var sepet=document.createElement("div"); sepet.className="sepet"; sepet.textContent="🧺";
+  var w=alan.clientWidth||600, h=alan.clientHeight||400;
+  var sepetX=(w/2)-30;
+  sepet.style.left=sepetX+"px";
+  alan.appendChild(sepet);
+
+  var dusenler=[], hedef=0, sonZaman=0, birikim=0;
+  function yeniSoru(){
+    var g=rastgeleIslem(S.ayar.aralik);
+    hedef=g.sonuc;
+    miniSoruYaz(g.ifade+" = ? (doğru sonucu yakala)");
+  }
+  function tasi(ev){
+    var r=alan.getBoundingClientRect();
+    var x=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left-30;
+    sepetX=Math.max(0,Math.min(alan.clientWidth-60,x));
+    sepet.style.left=sepetX+"px";
+  }
+  alan.addEventListener("pointermove", tasi);
+  alan.addEventListener("pointerdown", tasi);
+  function klavye(e){
+    if(e.key==="ArrowLeft"){ sepetX=Math.max(0,sepetX-40); sepet.style.left=sepetX+"px"; }
+    if(e.key==="ArrowRight"){ sepetX=Math.min(alan.clientWidth-60,sepetX+40); sepet.style.left=sepetX+"px"; }
+  }
+  window.addEventListener("keydown",klavye);
+  M.temizle=function(){
+    alan.removeEventListener("pointermove",tasi);
+    alan.removeEventListener("pointerdown",tasi);
+    window.removeEventListener("keydown",klavye);
+    dusenler=[];
+  };
+
+  function dusenEkle(){
+    var gen=alan.clientWidth;
+    if(gen<60) return;
+    var dogruMu=Math.random()<0.4;
+    var deger = dogruMu ? hedef : Math.max(0,hedef+(Math.random()<.5?-1:1)*rnd(1,12));
+    if(!dogruMu && deger===hedef) deger=hedef+rnd(1,6);
+    var d=document.createElement("div"); d.className="dusen";
+    var idx=rnd(0,meyveler.length-1);
+    d.style.background=renkler[idx];
+    d.textContent=deger;
+    var n={el:d,x:rnd(0,Math.max(1,gen-70)),y:-70,hiz:rnd(90,150)/1000,deger:deger};
+    d.style.left=n.x+"px"; d.style.top=n.y+"px";
+    alan.appendChild(d); dusenler.push(n);
+  }
+  function dongu(zaman){
+    if(!sonZaman) sonZaman=zaman;
+    var dt=Math.min(60,zaman-sonZaman); sonZaman=zaman;
+    birikim+=dt;
+    if(birikim>800){ birikim=0; dusenEkle(); }
+    var yer=alan.clientHeight-70;
+    for(var i=dusenler.length-1;i>=0;i--){
+      var n=dusenler[i];
+      n.y += n.hiz*dt*2.2;
+      n.el.style.top=n.y+"px";
+      if(n.y>yer && n.x < sepetX+70 && n.x+66 > sepetX){
+        if(n.deger===hedef){ sesDogru(); miniSkor(100); konfeti(12); yeniSoru(); }
+        else { sesYanlis(); M.puan=Math.max(0,M.puan-20); document.getElementById("miniPuan").textContent=M.puan; }
+        if(n.el.parentNode) n.el.parentNode.removeChild(n.el);
+        dusenler.splice(i,1);
+        continue;
+      }
+      if(n.y>alan.clientHeight+20){
+        if(n.el.parentNode) n.el.parentNode.removeChild(n.el);
+        dusenler.splice(i,1);
+      }
+    }
+    M.raf=requestAnimationFrame(dongu);
+  }
+  yeniSoru();
+  M.raf=requestAnimationFrame(dongu);
+}
+
+/* ---- 7) DOĞRU MU YANLIŞ MI? ---- */
+function dyBasla(){
+  miniHazirla("dy","⚖️ Doğru mu Yanlış mı?",45);
+  var alan=document.getElementById("miniAlan");
+  function tur(){
+    alan.innerHTML="";
+    var g=rastgeleIslem(S.ayar.aralik);
+    var dogruMu=Math.random()<.5;
+    var gost = dogruMu ? g.sonuc : sahteSonuc(g.sonuc);
+    miniSoruYaz(g.ifade+" = "+gost);
+    var kap=document.createElement("div"); kap.className="mini-orta";
+    [["D","✅ DOĞRU"],["Y","❌ YANLIŞ"]].forEach(function(p){
+      var b=document.createElement("button"); b.className="secenek"; b.style.minWidth="180px"; b.textContent=p[1];
+      b.onclick=function(){
+        var cevapDogru = (p[0]==="D") === dogruMu;
+        if(cevapDogru){ sesDogru(); miniSkor(100); b.classList.add("dogru"); setTimeout(tur,280); }
+        else { sesYanlis(); b.classList.add("yanlis"); setTimeout(tur,600); }
+      };
+      kap.appendChild(b);
+    });
+    alan.appendChild(kap);
+  }
+  tur();
+}
+
+/* ---- 8) SAYI SIRALAMA ---- */
+function siralaBasla(){
+  miniHazirla("sirala","🔢 Sayı Sıralama",90);
+  var alan=document.getElementById("miniAlan");
+  function tur(){
+    alan.innerHTML="";
+    var islemler=[], guv=0;
+    while(islemler.length<4 && guv<200){
+      guv++;
+      var g=rastgeleIslem(S.ayar.aralik), varMi=false;
+      for(var i=0;i<islemler.length;i++) if(islemler[i].sonuc===g.sonuc) varMi=true;
+      if(!varMi) islemler.push(g);
+    }
+    var sirali=islemler.slice().sort(function(a,b){ return a.sonuc-b.sonuc; });
+    miniSoruYaz("Sonuçları küçükten büyüğe sırala");
+    var kap=document.createElement("div"); kap.className="mini-orta";
+    var adim=0;
+    karistir(islemler.slice()).forEach(function(g){
+      var b=document.createElement("button"); b.className="sirala-kutu"; b.textContent=g.ifade;
+      b.onclick=function(){
+        if(b.classList.contains("secildi")) return;
+        if(g.sonuc===sirali[adim].sonuc){
+          sesTik(); b.classList.add("secildi"); b.textContent=g.ifade+" = "+g.sonuc; adim++;
+          if(adim===sirali.length){ sesDogru(); miniSkor(200); konfeti(20); setTimeout(tur,700); }
+        } else {
+          sesYanlis(); b.classList.add("yanlis");
+          setTimeout(function(){ b.classList.remove("yanlis"); },400);
+        }
+      };
+      kap.appendChild(b);
+    });
+    alan.appendChild(kap);
+  }
+  tur();
+}
+
+/* ---- 9) ONLUK - BİRLİK ---- */
+function blokBasla(){
+  miniHazirla("blok","🧱 Onluk – Birlik",90);
+  var alan=document.getElementById("miniAlan");
+  function tur(){
+    alan.innerHTML="";
+    var onluk=rnd(1,Math.floor(S.ayar.aralik/10)), birlik=rnd(0,9);
+    var sayi=onluk*10+birlik;
+    miniSoruYaz("Kaç tane var? (Mavi = onluk, Sarı = birlik)");
+    var kap=document.createElement("div"); kap.className="mini-orta";
+    var blok=document.createElement("div"); blok.className="blok-alan";
+    for(var i=0;i<onluk;i++){ var o=document.createElement("div"); o.className="onluk"; blok.appendChild(o); }
+    for(var j=0;j<birlik;j++){ var b1=document.createElement("div"); b1.className="birlik"; blok.appendChild(b1); }
+    kap.appendChild(blok);
+    var sec=document.createElement("div");
+    sec.style.cssText="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:100%";
+    secenekUret(sayi).forEach(function(s){
+      var b=document.createElement("button"); b.className="secenek"; b.style.minWidth="130px"; b.textContent=s;
+      b.onclick=function(){
+        if(s===sayi){ sesDogru(); miniSkor(100); b.classList.add("dogru"); konfeti(16); setTimeout(tur,650); }
+        else { sesYanlis(); b.classList.add("yanlis"); b.disabled=true; }
+      };
+      sec.appendChild(b);
+    });
+    kap.appendChild(sec);
+    alan.appendChild(kap);
+  }
+  tur();
+}
+
+/* =========================================================
+   ÖĞRETMEN PANELİ
+   ========================================================= */
+function ogretmenAc(){
+  document.getElementById("ayarOgrenci").value = S.ayar.ogrenci||"";
+  document.getElementById("ayarSoru").value = S.ayar.soruSayisi;
+  document.getElementById("ayarZorluk").value = S.ayar.aralik;
+  document.getElementById("ayarSure").value = S.ayar.sure;
+  document.getElementById("ayarKilit").value = S.ayar.kilit?1:0;
+  document.getElementById("ayarSes").value = S.ayar.ses?1:0;
+  document.getElementById("ayarKonus").value = S.ayar.konus?1:0;
+  document.getElementById("kzTop").checked = !!S.ayar.top;
+  document.getElementById("kzCik").checked = !!S.ayar.cik;
+  raporYenile();
+  ekran("ogretmen");
+}
+function ayarKaydet(){
+  S.ayar.ogrenci = document.getElementById("ayarOgrenci").value.replace(/^\s+|\s+$/g,"");
+  S.ayar.soruSayisi = parseInt(document.getElementById("ayarSoru").value,10);
+  S.ayar.aralik = parseInt(document.getElementById("ayarZorluk").value,10);
+  S.ayar.sure = parseInt(document.getElementById("ayarSure").value,10);
+  S.ayar.kilit = parseInt(document.getElementById("ayarKilit").value,10);
+  S.ayar.ses = parseInt(document.getElementById("ayarSes").value,10);
+  S.ayar.konus = parseInt(document.getElementById("ayarKonus").value,10);
+  S.ayar.top = document.getElementById("kzTop").checked;
+  S.ayar.cik = document.getElementById("kzCik").checked;
+  if(!S.ayar.top && !S.ayar.cik){ S.ayar.top=true; document.getElementById("kzTop").checked=true; }
+  kaydet(); mesaj("Ayarlar kaydedildi ✅",1200);
+}
+function raporYenile(){
+  var k=S.kayit, toplam=k.dogru+k.yanlis, oran=toplam?Math.round(k.dogru/toplam*100):0;
+  document.getElementById("raporOzet").innerHTML =
+    "👤 Öğrenci: <b>"+(S.ayar.ogrenci||"(belirtilmedi)")+"</b><br>"+
+    "📅 Tarih: <b>"+new Date().toLocaleDateString("tr-TR")+"</b><br>"+
+    "✅ Doğru cevap: <b>"+k.dogru+"</b> &nbsp; ❌ Yanlış deneme: <b>"+k.yanlis+"</b> &nbsp; 🎯 Başarı: <b>%"+oran+"</b><br>"+
+    "💎 Tamamlanan bölüm: <b>"+sayKristal()+" / "+BOLUMLER.length+"</b><br>"+
+    "⭐ Toplam puan: <b>"+k.toplamPuan+"</b><br>"+
+    "🏅 Kazanılan rozet: <b>"+Object.keys(k.rozet).length+" / "+ROZETLER.length+"</b>";
+
+  var bh='<table><tr><th>Bölüm</th><th>Kazanım</th><th>Oynama</th><th>Doğru/Soru</th><th>En iyi %</th><th>Yıldız</th></tr>';
+  BOLUMLER.forEach(function(b,i){
+    var ist=k.bolumIst[i]||{oyun:0,dogru:0,soru:0,enIyi:0};
+    var y=k.yildiz[i]||0;
+    bh+='<tr><td>'+(i+1)+'. '+b.ad+'</td><td>'+b.aciklama+'</td><td>'+ist.oyun+'</td><td>'+ist.dogru+' / '+ist.soru+'</td><td>%'+ist.enIyi+'</td><td>'+(repeat("⭐",y)||"-")+'</td></tr>';
+  });
+  bh+='</table>';
+  document.getElementById("raporBolum").innerHTML=bh;
+
+  var t=document.getElementById("raporTablo");
+  if(!k.yanlisLog.length){ t.innerHTML='<div class="rapor-bos">Henüz yanlış yapılan soru yok. 🎉</div>'; return; }
+  var h='<table><tr><th>#</th><th>Bölüm</th><th>Soru</th><th>Tür</th><th>Doğru Cevap</th><th>Tarih</th></tr>';
+  k.yanlisLog.slice(0,60).forEach(function(y,i){
+    h+='<tr><td>'+(i+1)+'</td><td>'+y.bolum+'</td><td>'+y.soru+'</td><td>'+y.tip+'</td><td><b>'+y.dogru+'</b></td><td>'+y.tarih+'</td></tr>';
+  });
+  h+='</table>';
+  t.innerHTML=h;
+}
+function raporTemizle(){
+  if(!confirm("Yanlış soru kaydı ve istatistikler silinsin mi?")) return;
+  S.kayit.yanlisLog=[]; S.kayit.dogru=0; S.kayit.yanlis=0; S.kayit.bolumIst={};
+  kaydet(); raporYenile();
+}
+function raporYazdir(){
+  var k=S.kayit, toplam=k.dogru+k.yanlis, oran=toplam?Math.round(k.dogru/toplam*100):0;
+  var h='<div style="font-family:Arial;padding:24px">'+
+    '<h1 style="color:#0d47a1">🏝️ Sayı Adası Macerası — Başarı Raporu</h1>'+
+    '<p><b>Öğrenci/Sınıf:</b> '+(S.ayar.ogrenci||"__________")+' &nbsp;&nbsp; <b>Tarih:</b> '+new Date().toLocaleDateString("tr-TR")+'</p>'+
+    '<p><b>Ders:</b> Matematik — 2. Sınıf &nbsp;&nbsp; <b>Konu:</b> Toplama ve Çıkarma İşlemleri</p><hr>'+
+    '<h3>Genel Performans</h3><ul>'+
+    '<li>Doğru cevap: <b>'+k.dogru+'</b></li><li>Yanlış deneme: <b>'+k.yanlis+'</b></li>'+
+    '<li>Başarı oranı: <b>%'+oran+'</b></li>'+
+    '<li>Tamamlanan bölüm: <b>'+sayKristal()+'/'+BOLUMLER.length+'</b></li>'+
+    '<li>Toplam puan: <b>'+k.toplamPuan+'</b></li>'+
+    '</ul><h3>Bölüm Bazlı Başarı</h3>'+
+    '<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;font-size:13px">'+
+    '<tr style="background:#e3f2fd"><th>Bölüm</th><th>Kazanım</th><th>Oynama</th><th>Doğru/Soru</th><th>En iyi %</th></tr>';
+  BOLUMLER.forEach(function(b,i){
+    var ist=k.bolumIst[i]||{oyun:0,dogru:0,soru:0,enIyi:0};
+    h+='<tr><td>'+(i+1)+'. '+b.ad+'</td><td>'+b.aciklama+'</td><td>'+ist.oyun+'</td><td>'+ist.dogru+' / '+ist.soru+'</td><td>%'+ist.enIyi+'</td></tr>';
+  });
+  h+='</table><h3>Yanlış Yapılan Sorular (Analiz)</h3>';
+  if(k.yanlisLog.length){
+    h+='<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;font-size:13px">'+
+       '<tr style="background:#e3f2fd"><th>#</th><th>Bölüm</th><th>Soru</th><th>Tür</th><th>Doğru Cevap</th></tr>';
+    k.yanlisLog.slice(0,60).forEach(function(y,i){
+      h+='<tr><td>'+(i+1)+'</td><td>'+y.bolum+'</td><td>'+y.soru+'</td><td>'+y.tip+'</td><td><b>'+y.dogru+'</b></td></tr>';
+    });
+    h+='</table>';
+  } else h+='<p>Yanlış yapılan soru bulunmuyor. 🎉</p>';
+  h+='<p style="margin-top:20px;font-size:12px;color:#555">Bu rapor "Sayı Adası Macerası v2.0" eğitim oyunu tarafından oluşturulmuştur. Yazdır ekranında hedef olarak "PDF olarak kaydet" seçeneğini seçin.</p></div>';
+  document.getElementById("yazdirAlan").innerHTML=h;
+  window.print();
+}
+
+/* ---------------- Başlangıç ---------------- */
+yukle();
+document.addEventListener("click", function(){ var c=ac(); if(c && c.state==="suspended") c.resume(); });
+window.addEventListener("keydown", function(e){ if(e.key==="Escape") sayacDurdur(); });
+miniMenuAc();
+ekran("menu");
+</script>
+</body>
+</html>
